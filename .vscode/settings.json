@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "*.vue": "vue",
+    "lexicalanalyzer.h": "c",
+    "liblexicalanalyzer.h": "c",
+    "string.h": "c"
+  },
+}
