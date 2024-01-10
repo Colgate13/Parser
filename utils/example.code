@@ -1,4 +1,16 @@
-abc+123*456/12.0
+program
 
+print("Hello World");
 
+var int num1;
+var int num2;
+var int result;
 
+num1 = 1;
+num2 = 2;
+
+result = num1 + num2;
+
+print(result);
+
+end;

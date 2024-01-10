@@ -1,0 +1,67 @@
+{
+	"program": {
+		"statements": [
+			{
+				"print_statement": {
+					"command": "print",
+					"expression": {
+						"string": "Hello World"
+					}
+				}
+},
+			{
+				"variable_declaration": {
+					"keyword": "var",
+					"type": "int",
+					"identifier": "num1"
+				}
+},
+			{
+				"variable_declaration": {
+					"keyword": "var",
+					"type": "int",
+					"identifier": "num2"
+				}
+},
+			{
+				"variable_declaration": {
+					"keyword": "var",
+					"type": "int",
+					"identifier": "result"
+				}
+},
+			{
+				"assignment": {
+					"identifier": "num1",
+					"expression": {
+						"number": "1"
+					}
+				}
+},
+			{
+				"assignment": {
+					"identifier": "num2",
+					"expression": {
+						"number": "2"
+					}
+				}
+},
+			{
+				"assignment": {
+					"identifier": "result",
+					"expression": {
+						"identifier": "num1"
+					}
+				}
+},
+			{
+				"print_statement": {
+					"command": "print",
+					"expression": {
+						"identifier": "result"
+					}
+				}
+}
+		]
+	}
+}

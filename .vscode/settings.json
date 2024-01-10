@@ -3,6 +3,10 @@
     "*.vue": "vue",
     "lexicalanalyzer.h": "c",
     "liblexicalanalyzer.h": "c",
-    "string.h": "c"
+    "string.h": "c",
+    "error.h": "c",
+    "parser.h": "c",
+    "stddef.h": "c",
+    "stdlib.h": "c"
   },
 }
