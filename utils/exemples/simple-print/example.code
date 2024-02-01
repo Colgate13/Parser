@@ -1,0 +1,5 @@
+program
+
+  print("Hello World");
+
+end;
