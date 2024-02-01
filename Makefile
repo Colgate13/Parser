@@ -9,8 +9,9 @@ TARGET = main # output file
 SOURCE_FILE = $(SRC_DIR)/main.c # source file
 SOURCES = $(SRC_DIR)/Error.c $(SRC_DIR)/Parser.c # sources
 LIB_LEXICAL_ANALIZER = -llexicalAnalyzer
+LIB_CJSON = -lcjson
 
-LIBS_ALL = $(LIB_PATH) $(LIB_LEXICAL_ANALIZER)
+LIBS_ALL = $(LIB_PATH) $(LIB_LEXICAL_ANALIZER) $(LIB_CJSON)
 
 OUTPUT_FILE = $(BIN_DIR)/$(TARGET)
 
@@ -24,6 +25,9 @@ $(OUTPUT_FILE): $(SOURCE_FILE) | $(BIN_DIR)
 
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
+
+build_ast:
+	$(CC) $(CFLAGS) -o $(BIN_DIR)/ast $(SOURCES) $(SRC_DIR)/Ast.c $(LIBS_ALL)
 
 clean:
 	rm -rf $(BIN_DIR)/$(TARGET)

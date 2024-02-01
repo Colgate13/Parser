@@ -6,6 +6,14 @@
 
 #define MAX_LINE_SIZE 1024
 
+// int *createAstFileLocation(char *fileName, size_t start, size_t end)
+// {
+//   int *fileLocation = malloc(sizeof(int));
+//   return fileLocation;
+// }
+
+// int teste = NULL;
+
 int main(int argc, char *argv[])
 {
   printf("Lexical Analyzer\n");

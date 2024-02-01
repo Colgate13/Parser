@@ -11,12 +11,13 @@
 <print_statement>    --> "print(" <expression> ");"
 
 <expression>         --> <term> <expression_tail>
-                    | <number>
-                    | <string>
-                    | <identifier>
+                    | <term>
 
 <expression_tail>    --> "+" <term> <expression_tail>
                     | "-" <term> <expression_tail>
+                    | "*" <term> <expression_tail>
+                    | "/" <term> <expression_tail>
+                    | "%" <term> <expression_tail>
                     | ε
 
 <term>               --> <number>
