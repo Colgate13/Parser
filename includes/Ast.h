@@ -2,52 +2,36 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+#include "./Parser.h"
+#include "cjson/cJSON.h"
 
-enum EKeywords
-{
-  PRINT_STATEMENT = 0,
-  ASSIGNMENT_STATEMENT,
-  VARIABLE_DECLARATION_STATEMENT,
-  EXPRESSION_TERM,
-  TERM,
-  STRING
-};
-
-typedef enum
-{
-  TYPE_INT,
-  TYPE_FLOAT,
-  TYPE_STRING,
-  TYPE_BOOL
-} Type;
-
-// AstFileLocation = { start: 0, end: 0, fileName: "test.txt" }
+// Location = { start: 0, end: 0, fileName: "test.txt" }
 typedef struct
 {
   size_t start;
   size_t end;
   char *fileName;
-} AstFileLocation;
+} Location;
 
 // <identifier> --> [a-zA-Z_][a-zA-Z0-9_]*
 typedef struct Identifier
 {
   char *name;
-  AstFileLocation *fileLocation;
+  Location *location;
 } Identifier;
 
 // <number> --> [0-9]+
 typedef struct Number
 {
   int value;
-  AstFileLocation *fileLocation;
+  Location *location;
 } Number;
 
 // <string> --> '"' [a-zA-Z0-9_]* '"'
 typedef struct String
 {
   char *value;
-  AstFileLocation *fileLocation;
+  Location *location;
 } String;
 
 // Term = Number | Identifier | String
@@ -58,7 +42,7 @@ typedef struct Term
   Identifier *identifier;
   // |
   String *string;
-  AstFileLocation *fileLocation;
+  Location *location;
 } Term;
 
 // <expression_tail> --> "+" <term> <expression_tail> | "-" <term> <expression_tail> | ε
@@ -67,7 +51,7 @@ typedef struct ExpressionTail
   char op;
   Term *term;
   struct ExpressionTail *next;
-  AstFileLocation *fileLocation;
+  Location *location;
 } ExpressionTail;
 
 // <expression> --> <term> <expression_tail> | <term>
@@ -75,7 +59,7 @@ typedef struct Expression
 {
   Term *term;
   ExpressionTail *expression_tail;
-  AstFileLocation *fileLocation;
+  Location *location;
 } Expression;
 
 // <assignment> --> <identifier> "=" <expression> ";"
@@ -83,7 +67,7 @@ typedef struct Assignment
 {
   Identifier *identifier;
   Expression *expression;
-  AstFileLocation *fileLocation;
+  Location *location;
 } Assignment;
 
 // <variable_declaration> --> "var" <type> <identifier> ";"
@@ -91,14 +75,14 @@ typedef struct VariableDeclaration
 {
   Type type;
   Identifier *identifier;
-  AstFileLocation *fileLocation;
+  Location *location;
 } VariableDeclaration;
 
 // <print_statement> --> "print(" <expression> ");"
 typedef struct PrintStatement
 {
   Expression *expression;
-  AstFileLocation *fileLocation;
+  Location *location;
 } PrintStatement;
 
 // <statement> -> <assignment> | <variable_declaration> | <print_statement>
@@ -110,7 +94,7 @@ typedef struct Statement
   // |
   PrintStatement *print_statement;
   struct Statement *next;
-  AstFileLocation *fileLocation;
+  Location *location;
   unsigned short int type;
 } Statement;
 
@@ -118,5 +102,30 @@ typedef struct Statement
 typedef struct Program
 {
   Statement *statements;
-  AstFileLocation *fileLocation;
+  Location *location;
 } Program;
+
+Program createProgram(Location *location);
+Location *createLocation(char *fileName, size_t start, size_t end);
+Statement *createStatement_Assignment(Location *location, Assignment *assignment, VariableDeclaration *vd, PrintStatement *ps);
+Statement *createStatement_VariableDeclaration(Location *Location, Assignment *assignment, VariableDeclaration *vd, PrintStatement *ps);
+Statement *createStatement_PrintStatement(Location *location, Assignment *assignment, VariableDeclaration *vd, PrintStatement *ps);
+VariableDeclaration *createVariableDeclaration(Location *location, Type type, Identifier *identifier);
+Assignment *createAssignment(Location *location, Identifier *identifier, Expression *expression);
+PrintStatement *createPrintStatement(Location *location, Expression *expression);
+Expression *createExpression_Term_ExpressionTail(Location *location, Term *term, ExpressionTail *tail);
+Expression *createExpression_Term(Location *location, Term *term);
+ExpressionTail *createExpressionTail(Location *location, char op, Term *term, ExpressionTail *next);
+Term *createTerm_number(Location *location, Number *number);
+Term *createTerm_identifier(Location *location, Identifier *identifier);
+Term *createTerm_string(Location *location, String *string);
+String *createString(Location *location, char *value);
+Number *createNumber(Location *location, int value);
+Identifier *createIdentifier(Location *location, char *name);
+Type getLiteralType(char *searchType);
+cJSON *checkLocation(Location *Location);
+cJSON *AstConsumerTerm(Term *term);
+cJSON *AstConsumerExpression(Expression *expr);
+cJSON *AstConsumerPrintStatement(PrintStatement *ps);
+void createOutputFile(cJSON *json);
+void AstConsumer(Program program);

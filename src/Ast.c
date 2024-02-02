@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../includes/Ast.h"
-#include "cjson/cJSON.h"
-// #define NULL ((void *)0)
 
 char *fileOutput = "output.js";
 char *fileOutputAst = "ast-output.json";
@@ -11,36 +9,36 @@ char *fileOutputAst = "ast-output.json";
 /**
  * @Program
  */
-Program createProgram(AstFileLocation *fileLocation)
+Program createProgram(Location *location)
 {
   Program program;
 
   program.statements = NULL;
-  program.fileLocation = fileLocation;
+  program.location = location;
   return program;
 }
 
 /**
- * @AstFileLocation
+ * @Location
  */
-AstFileLocation *createAstFileLocation(char *fileName, size_t start, size_t end)
+Location *createLocation(char *fileName, size_t start, size_t end)
 {
-  AstFileLocation *fileLocation = malloc(sizeof(AstFileLocation));
+  Location *Location = malloc(sizeof(Location));
 
-  fileLocation->fileName = strdup(fileName);
-  fileLocation->start = start;
-  fileLocation->end = end;
-  return fileLocation;
+  Location->fileName = strdup(fileName);
+  Location->start = start;
+  Location->end = end;
+  return Location;
 }
 
 /**
  * @Statement
  */
-Statement *createStatement_Assignment(AstFileLocation *fileLocation, Assignment *assignment, VariableDeclaration *vd, PrintStatement *ps)
+Statement *createStatement_Assignment(Location *location, Assignment *assignment, VariableDeclaration *vd, PrintStatement *ps)
 {
   Statement *s = malloc(sizeof(Statement));
 
-  s->fileLocation = fileLocation;
+  s->location = location;
   s->type = ASSIGNMENT_STATEMENT;
 
   s->assignment = assignment;
@@ -53,11 +51,11 @@ Statement *createStatement_Assignment(AstFileLocation *fileLocation, Assignment 
 /**
  * @Statement
  */
-Statement *createStatement_VariableDeclaration(AstFileLocation *fileLocation, Assignment *assignment, VariableDeclaration *vd, PrintStatement *ps)
+Statement *createStatement_VariableDeclaration(Location *Location, Assignment *assignment, VariableDeclaration *vd, PrintStatement *ps)
 {
   Statement *s = malloc(sizeof(Statement));
 
-  s->fileLocation = fileLocation;
+  s->location = Location;
   s->type = VARIABLE_DECLARATION_STATEMENT;
 
   s->assignment = NULL;
@@ -70,11 +68,11 @@ Statement *createStatement_VariableDeclaration(AstFileLocation *fileLocation, As
 /**
  * @Statement
  */
-Statement *createStatement_PrintStatement(AstFileLocation *fileLocation, Assignment *assignment, VariableDeclaration *vd, PrintStatement *ps)
+Statement *createStatement_PrintStatement(Location *location, Assignment *assignment, VariableDeclaration *vd, PrintStatement *ps)
 {
   Statement *s = malloc(sizeof(Statement));
 
-  s->fileLocation = fileLocation;
+  s->location = location;
   s->type = PRINT_STATEMENT;
 
   s->assignment = NULL;
@@ -87,11 +85,11 @@ Statement *createStatement_PrintStatement(AstFileLocation *fileLocation, Assignm
 /**
  * @VariableDeclaration
  */
-VariableDeclaration *createVariableDeclaration(AstFileLocation *fileLocation, Type type, Identifier *identifier)
+VariableDeclaration *createVariableDeclaration(Location *location, Type type, Identifier *identifier)
 {
   VariableDeclaration *vd = malloc(sizeof(VariableDeclaration));
 
-  vd->fileLocation = fileLocation;
+  vd->location = location;
 
   vd->type = type;
   vd->identifier = identifier;
@@ -101,11 +99,11 @@ VariableDeclaration *createVariableDeclaration(AstFileLocation *fileLocation, Ty
 /**
  * @Assignment
  */
-Assignment *createAssignment(AstFileLocation *fileLocation, Identifier *identifier, Expression *expression)
+Assignment *createAssignment(Location *location, Identifier *identifier, Expression *expression)
 {
   Assignment *a = malloc(sizeof(Assignment));
 
-  a->fileLocation = fileLocation;
+  a->location = location;
 
   a->identifier = identifier;
   a->expression = expression;
@@ -115,11 +113,11 @@ Assignment *createAssignment(AstFileLocation *fileLocation, Identifier *identifi
 /**
  * @PrintStatement
  */
-PrintStatement *createPrintStatement(AstFileLocation *fileLocation, Expression *expression)
+PrintStatement *createPrintStatement(Location *location, Expression *expression)
 {
   PrintStatement *ps = malloc(sizeof(PrintStatement));
 
-  ps->fileLocation = fileLocation;
+  ps->location = location;
   ps->expression = expression;
   return ps;
 }
@@ -127,11 +125,11 @@ PrintStatement *createPrintStatement(AstFileLocation *fileLocation, Expression *
 /**
  * @Expression
  */
-Expression *createExpression_Term_ExpressionTail(AstFileLocation *fileLocation, Term *term, ExpressionTail *tail)
+Expression *createExpression_Term_ExpressionTail(Location *location, Term *term, ExpressionTail *tail)
 {
   Expression *expr = malloc(sizeof(Expression));
 
-  expr->fileLocation = fileLocation;
+  expr->location = location;
 
   expr->term = term;
   expr->expression_tail = tail;
@@ -141,11 +139,11 @@ Expression *createExpression_Term_ExpressionTail(AstFileLocation *fileLocation, 
 /**
  * @Expression
  */
-Expression *createExpression_Term(AstFileLocation *fileLocation, Term *term)
+Expression *createExpression_Term(Location *location, Term *term)
 {
   Expression *expr = malloc(sizeof(Expression));
 
-  expr->fileLocation = fileLocation;
+  expr->location = location;
 
   expr->term = term;
   expr->expression_tail = NULL;
@@ -155,11 +153,11 @@ Expression *createExpression_Term(AstFileLocation *fileLocation, Term *term)
 /**
  * @ExpressionTail
  */
-ExpressionTail *createExpressionTail(AstFileLocation *fileLocation, char op, Term *term, ExpressionTail *next)
+ExpressionTail *createExpressionTail(Location *location, char op, Term *term, ExpressionTail *next)
 {
   ExpressionTail *tail = malloc(sizeof(ExpressionTail));
 
-  tail->fileLocation = fileLocation;
+  tail->location = location;
 
   tail->op = op;
   tail->term = term;
@@ -170,11 +168,11 @@ ExpressionTail *createExpressionTail(AstFileLocation *fileLocation, char op, Ter
 /**
  * @Term
  */
-Term *createTerm_number(AstFileLocation *fileLocation, Number *number)
+Term *createTerm_number(Location *location, Number *number)
 {
   Term *term = malloc(sizeof(Term));
 
-  term->fileLocation = fileLocation;
+  term->location = location;
 
   term->number = number;
   term->identifier = NULL;
@@ -185,11 +183,11 @@ Term *createTerm_number(AstFileLocation *fileLocation, Number *number)
 /**
  * @Term
  */
-Term *createTerm_identifier(AstFileLocation *fileLocation, Identifier *identifier)
+Term *createTerm_identifier(Location *location, Identifier *identifier)
 {
   Term *term = malloc(sizeof(Term));
 
-  term->fileLocation = fileLocation;
+  term->location = location;
 
   term->number = NULL;
   term->identifier = identifier;
@@ -200,11 +198,11 @@ Term *createTerm_identifier(AstFileLocation *fileLocation, Identifier *identifie
 /**
  * @Term
  */
-Term *createTerm_string(AstFileLocation *fileLocation, String *string)
+Term *createTerm_string(Location *location, String *string)
 {
   Term *term = malloc(sizeof(Term));
 
-  term->fileLocation = fileLocation;
+  term->location = location;
 
   term->number = NULL;
   term->identifier = NULL;
@@ -215,11 +213,11 @@ Term *createTerm_string(AstFileLocation *fileLocation, String *string)
 /**
  * @String
  */
-String *createString(AstFileLocation *fileLocation, char *value)
+String *createString(Location *location, char *value)
 {
   String *str = malloc(sizeof(String));
 
-  str->fileLocation = fileLocation;
+  str->location = location;
 
   str->value = strdup(value);
   return str;
@@ -228,11 +226,11 @@ String *createString(AstFileLocation *fileLocation, char *value)
 /**
  * @Number
  */
-Number *createNumber(AstFileLocation *fileLocation, int value)
+Number *createNumber(Location *location, int value)
 {
   Number *number = malloc(sizeof(Number));
 
-  number->fileLocation = fileLocation;
+  number->location = location;
 
   number->value = value;
   return number;
@@ -241,11 +239,11 @@ Number *createNumber(AstFileLocation *fileLocation, int value)
 /**
  * @Identifier
  */
-Identifier *createIdentifier(AstFileLocation *fileLocation, char *name)
+Identifier *createIdentifier(Location *location, char *name)
 {
   Identifier *identifier = malloc(sizeof(Identifier));
 
-  identifier->fileLocation = fileLocation;
+  identifier->location = location;
 
   identifier->name = strdup(name);
   return identifier;
@@ -254,63 +252,63 @@ Identifier *createIdentifier(AstFileLocation *fileLocation, char *name)
 /**
  * @Type
  */
-Type getType(char *type)
+Type getLiteralType(char *searchType)
 {
-  if (strcmp(type, "int") == 0)
+  if (strcmp(searchType, "int") == 0)
   {
     return TYPE_INT;
   }
-  else if (strcmp(type, "string") == 0)
+  else if (strcmp(searchType, "string") == 0)
   {
     return TYPE_STRING;
   }
-  else if (strcmp(type, "bool") == 0)
+  else if (strcmp(searchType, "bool") == 0)
   {
     return TYPE_BOOL;
   }
-  else if (strcmp(type, "float") == 0)
+  else if (strcmp(searchType, "float") == 0)
   {
     return TYPE_FLOAT;
   }
   else
   {
-    printf("Type unknow: %s\n", type);
+    printf("Type unknow: %s\n", searchType);
     exit(1);
   }
 }
 
-cJSON *checkFileLocation(AstFileLocation *fileLocation)
+cJSON *checkLocation(Location *Location)
 {
-  if (fileLocation == NULL)
+  if (Location == NULL)
   {
-    printf("FileLocation without fileLocation\n");
+    printf("Location without Location\n");
     exit(1);
   }
 
-  if (fileLocation->fileName == NULL)
+  if (Location->fileName == NULL)
   {
-    printf("FileLocation without fileName\n");
+    printf("Location without fileName\n");
     exit(1);
   }
 
-  if (fileLocation->start == 0)
+  if (Location->start == 0)
   {
-    printf("FileLocation without start\n");
+    printf("Location without start\n");
     exit(1);
   }
 
-  if (fileLocation->end == 0)
+  if (Location->end == 0)
   {
-    printf("FileLocation without end\n");
+    printf("Location without end\n");
     exit(1);
   }
 
-  cJSON *jsonFileLocation = cJSON_CreateObject();
-  cJSON_AddItemToObject(jsonFileLocation, "FileName", cJSON_CreateString(fileLocation->fileName));
-  cJSON_AddItemToObject(jsonFileLocation, "Start", cJSON_CreateNumber(fileLocation->start));
-  cJSON_AddItemToObject(jsonFileLocation, "End", cJSON_CreateNumber(fileLocation->end));
+  cJSON *jsonLocation = cJSON_CreateObject();
+  cJSON_AddItemToObject(jsonLocation, "FileName", cJSON_CreateString(Location->fileName));
+  cJSON_AddItemToObject(jsonLocation, "Start", cJSON_CreateNumber(Location->start));
+  cJSON_AddItemToObject(jsonLocation, "End", cJSON_CreateNumber(Location->end));
 
-  return jsonFileLocation;
+  return jsonLocation;
 }
 
 cJSON *AstConsumerTerm(Term *term)
@@ -323,7 +321,7 @@ cJSON *AstConsumerTerm(Term *term)
 
   cJSON *jsonTerm = cJSON_CreateObject();
 
-  checkFileLocation(term->fileLocation);
+  checkLocation(term->location);
 
   if (term->number == NULL && term->identifier == NULL && term->string == NULL)
   {
@@ -355,7 +353,7 @@ cJSON *AstConsumerTerm(Term *term)
     cJSON_AddStringToObject(jsonTerm, "String", term->string->value);
   }
 
-  cJSON_AddItemToObject(jsonTerm, "Location", checkFileLocation(term->fileLocation));
+  cJSON_AddItemToObject(jsonTerm, "Location", checkLocation(term->location));
 
   return jsonTerm;
 }
@@ -370,7 +368,7 @@ cJSON *AstConsumerExpression(Expression *expr)
 
   cJSON *jsonExpr = cJSON_CreateObject();
   cJSON_AddItemToObject(jsonExpr, "Term", AstConsumerTerm(expr->term));
-  cJSON_AddItemToObject(jsonExpr, "Location", checkFileLocation(expr->fileLocation));
+  cJSON_AddItemToObject(jsonExpr, "Location", checkLocation(expr->location));
 
   // TODO: expression_tail
 
@@ -387,7 +385,7 @@ cJSON *AstConsumerPrintStatement(PrintStatement *ps)
 
   cJSON *jsonPs = cJSON_CreateObject();
   cJSON_AddItemToObject(jsonPs, "Expression", AstConsumerExpression(ps->expression));
-  cJSON_AddItemToObject(jsonPs, "Location", checkFileLocation(ps->fileLocation));
+  cJSON_AddItemToObject(jsonPs, "Location", checkLocation(ps->location));
 
   return jsonPs;
 }
@@ -448,77 +446,77 @@ void AstConsumer(Program program)
     cJSON_AddItemToArray(jsonStatements, jsonStatement);
   }
 
-  cJSON *jsonFileLocation = checkFileLocation(program.fileLocation);
-  cJSON_AddItemToObject(jsonProgram, "Location", jsonFileLocation);
+  cJSON *jsonLocation = checkLocation(program.location);
+  cJSON_AddItemToObject(jsonProgram, "Location", jsonLocation);
   createOutputFile(jsonProgram);
   cJSON_Delete(jsonProgram);
 }
 
-int main()
-{
-  Program program;
-  program = createProgram(createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 1, 1));
+// int main()
+// {
+//   Program program;
+//   program = createProgram(createLocation("/home/gabriel/projetos/Parser/utils/example.code", 1, 1));
 
-  program.statements = createStatement_PrintStatement(
-      createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-      NULL,
-      NULL,
-      createPrintStatement(
-          createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-          createExpression_Term(
-              createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-              createTerm_string(
-                  createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-                  createString(
-                      createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-                      "Hello World")))));
+//   program.statements = createStatement_PrintStatement(
+//       createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+//       NULL,
+//       NULL,
+//       createPrintStatement(
+//           createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+//           createExpression_Term(
+//               createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+//               createTerm_string(
+//                   createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+//                   createString(
+//                       createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+//                       "Hello World")))));
 
-  AstConsumer(program);
-
+//   AstConsumer(program);
+// }
   // program.statements = createStatement_PrintStatement(
-  //     createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+  //     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
   //     NULL,
   //     NULL,
   //     createPrintStatement(
-  //         createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+  //         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
   //         createExpression_Term(
-  //             createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+  //             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
   //             createTerm_string(
-  //                 createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+  //                 createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
   //                 createString(
-  //                     createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+  //                     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
   //                     "Hello World")))));
 
   // program.statements->next = createStatement_VariableDeclaration(
-  //     createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
+  //     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
   //     NULL,
   //     createVariableDeclaration(
-  //         createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
+  //         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
   //         getType("int"),
   //         createIdentifier(
-  //             createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
+  //             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
   //             "num1")),
   //     NULL);
 
   // program.statements->next->next = createStatement_VariableDeclaration(
-  //     createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
+  //     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
   //     NULL,
   //     createVariableDeclaration(
-  //         createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
+  //         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
   //         getType("int"),
   //         createIdentifier(
-  //             createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
+  //             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
   //             "num2")),
   //     NULL);
 
   // program.statements->next->next->next = createStatement_VariableDeclaration(
-  //     createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
+  //     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
   //     NULL,
   //     createVariableDeclaration(
-  //         createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
+  //         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
   //         getType("int"),
   //         createIdentifier(
-  //             createAstFileLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
+  //             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
   //             "result")),
   //     NULL);
 
@@ -563,5 +561,5 @@ int main()
   //   }
   // }
 
-  return 0;
-}
+//   return 0;
+// }

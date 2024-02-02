@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
   LexicalAnalyzer *lexicalAnalyzer = createLexicalAnalyzer(argv[1]);
   Parser *parser = createParser(lexicalAnalyzer);
   printf("Star of file\n");
-  Program(parser);
+  ParserProgram(parser);
   printf("End of file\n");
 
   closeLexicalAnalyzer(lexicalAnalyzer);
