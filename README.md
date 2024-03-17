@@ -1,5 +1,5 @@
 My Grammar: 
-```ts
+```
 <program>            --> "program" <statement> "end;"
 <statement>          --> <assignment>
                     | <variable_declaration>
