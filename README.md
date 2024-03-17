@@ -1,19 +1,28 @@
-Gramatica G:
-
-G = (Vn, Vt, P, S)
-
-Vn (Nao terminais) = {E, T, OP}
-Vt (Terminais) = {id, number, +, -, *, /}
-
-E -> E OP T | T
-T -> id  | number
-OP -> + | - | * | /
-
-Temos recursividade a esquerda, entao precisamos fatorar:
-
-Regras Sintaticas:
-
-1a. E -> T E'
-1b. E' -> OP T E' | &
-2.  T -> id | number
-3. OP -> + | - | * | /
+My Grammar: 
+```ts
+<program>            --> "program" <statement> "end;"
+<statement>          --> <assignment>
+                    | <variable_declaration>
+                    | <print_statement>
+<variable_declaration> --> "var" <type> <identifier> ";"
+<assignment>         --> <identifier> "=" <expression> ";"
+<print_statement>    --> "print(" <expression> ");"
+<expression>         --> <term> <expression_tail>
+                    | <term>
+<expression_tail>    --> "+" <term> <expression_tail>
+                    | "-" <term> <expression_tail>
+                    | "*" <term> <expression_tail>
+                    | "/" <term> <expression_tail>
+                    | "%" <term> <expression_tail>
+                    | ε
+<term>               --> <number>
+                    | <identifier>
+                    | <string>
+<number>             --> [0-9]+
+<string>             --> '"' [a-zA-Z0-9_]* '"'
+<identifier>         --> [a-zA-Z_][a-zA-Z0-9_]*
+<type>               --> "int"
+                    | "float"
+                    | "string"
+                    | "bool"
+```
