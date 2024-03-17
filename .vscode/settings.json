@@ -69,7 +69,9 @@
     "__functional_base_03": "c",
     "__hash_table": "c",
     "__tuple": "c",
-    "cjson.h": "c"
+    "cjson.h": "c",
+    "stdio.h": "c",
+    "stdlib.h": "c"
   },
   "C_Cpp.errorSquiggles": "disabled",
 }

@@ -34,7 +34,7 @@ Location *createLocation(char *fileName, size_t start, size_t end)
 /**
  * @Statement
  */
-Statement *createStatement_Assignment(Location *location, Assignment *assignment, VariableDeclaration *vd, PrintStatement *ps)
+Statement *createStatement_Assignment(Location *location, Assignment *assignment)
 {
   Statement *s = malloc(sizeof(Statement));
 
@@ -51,7 +51,7 @@ Statement *createStatement_Assignment(Location *location, Assignment *assignment
 /**
  * @Statement
  */
-Statement *createStatement_VariableDeclaration(Location *Location, Assignment *assignment, VariableDeclaration *vd, PrintStatement *ps)
+Statement *createStatement_VariableDeclaration(Location *Location, VariableDeclaration *vd)
 {
   Statement *s = malloc(sizeof(Statement));
 
@@ -68,7 +68,7 @@ Statement *createStatement_VariableDeclaration(Location *Location, Assignment *a
 /**
  * @Statement
  */
-Statement *createStatement_PrintStatement(Location *location, Assignment *assignment, VariableDeclaration *vd, PrintStatement *ps)
+Statement *createStatement_PrintStatement(Location *location, PrintStatement *ps)
 {
   Statement *s = malloc(sizeof(Statement));
 

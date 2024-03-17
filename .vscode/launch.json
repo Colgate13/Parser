@@ -7,7 +7,7 @@
           "request": "launch",
           "program": "${workspaceFolder}/bin/main",
           "args": [
-            "./utils/example.code"
+            "./utils/exemples/simple-printNumber/example.code"
           ],
           "stopAtEntry": false,
           "cwd": "${workspaceFolder}",
