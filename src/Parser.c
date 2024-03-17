@@ -140,13 +140,13 @@ PrintStatement *ParserPrintStatement(Parser *parser)
         }
         else
         {
-           throwError(1, "Expected )\n");
+            throwError(1, "Expected )\n");
             exit(1);
         }
     }
     else
     {
-       throwError(1, "Expected identifier\n");
+        throwError(1, "Expected identifier\n");
         exit(1);
     }
 }
@@ -157,8 +157,7 @@ Expression *ParserExpression(Parser *parser)
     logToken(parser);
 
     if (
-        strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_NUMBER") == 0
-        || strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_STRING") == 0)
+        strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_NUMBER") == 0 || strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_STRING") == 0)
     {
         Expression *expr = createExpression_Term(
             cl(parser), ParserTerm(parser));
@@ -167,7 +166,7 @@ Expression *ParserExpression(Parser *parser)
     }
     else
     {
-       throwError(1, "Expected TOKEN_TYPE_NUMBER\n");
+        throwError(1, "Expected TOKEN_TYPE_NUMBER\n");
         exit(1);
     }
 }
@@ -188,7 +187,7 @@ Term *ParserTerm(Parser *parser)
     }
     else
     {
-       throwError(1, "Expected TOKEN_TYPE_NUMBER, TOKEN_TYPE_IDENTIFIER\n");
+        throwError(1, "Expected TOKEN_TYPE_NUMBER, TOKEN_TYPE_IDENTIFIER\n");
         exit(1);
     }
 }
