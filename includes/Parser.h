@@ -142,13 +142,18 @@ typedef struct
   Token token;
 } Parser;
 
-Parser *createParser(LexicalAnalyzer *lexicalAnalyzer);
 void controlNextToken(Parser *parser);
 void ParserProgram(Parser *parser);
+void logToken(Parser *parser);
+char *removeQuotes(char *str);
+
+Parser *createParser(LexicalAnalyzer *lexicalAnalyzer);
 Statement *ParserStatement(Parser *parser);
 PrintStatement *ParserPrintStatement(Parser *parser);
 Expression *ParserExpression(Parser *parser);
 Term *ParserTerm(Parser *parser);
+
+Location *cl(Parser *parser);
 // void ParserString(Parser *parser);
 // void ParserParenthesis(Parser *parser);
 // void ParserVariableDeclaration(Parser *parser);

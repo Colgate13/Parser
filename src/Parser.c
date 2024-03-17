@@ -51,6 +51,25 @@ Location *cl(Parser *parser)
     return createLocation("*file*", parser->lexicalAnalyzer->lineCount, parser->lexicalAnalyzer->positionCount);
 }
 
+void logToken(Parser *parser)
+{
+    printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+}
+
+char *removeQuotes(char *str)
+{
+    int i, j;
+    for (i = 0, j = 0; str[i] != '\0'; i++)
+    {
+        if (str[i] != '\"')
+        {
+            str[j++] = str[i];
+        }
+    }
+    str[j] = '\0';
+    return str;
+}
+
 /**
  * @details Implements <program>
  *
@@ -59,8 +78,6 @@ Location *cl(Parser *parser)
  */
 void ParserProgram(Parser *parser)
 {
-    printf("Program\n");
-
     Program program;
     program = createProgram(createLocation("*file*", 1, 1));
     parser->ast->program = &program;
@@ -70,11 +87,11 @@ void ParserProgram(Parser *parser)
         strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_IDENTIFIER") == 0 ||
         strcmp(parser->token.value, keywords[PROGRAM]) == 0)
     {
-        printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+        logToken(parser);
         parser->ast->program->statements = ParserStatement(parser);
+        controlNextToken(parser);
         if ((parser->token.value && strcmp(parser->token.value, keywords[END]) == 0) || strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_END") == 0)
         {
-            printf("End of program\n");
             return;
         }
     }
@@ -86,7 +103,7 @@ void ParserProgram(Parser *parser)
 Statement *ParserStatement(Parser *parser)
 {
     controlNextToken(parser);
-    printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+    logToken(parser);
 
     if (strcmp(parser->token.value, keywords[PRINT]) == 0)
     {
@@ -96,7 +113,7 @@ Statement *ParserStatement(Parser *parser)
     }
     else
     {
-        throwError(1, "Error: Expected identifier, print or end\n");
+        throwError(1, "Expected identifier, print or end\n");
         exit(1);
     }
 }
@@ -107,7 +124,7 @@ Statement *ParserStatement(Parser *parser)
 PrintStatement *ParserPrintStatement(Parser *parser)
 {
     controlNextToken(parser);
-    printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+    logToken(parser);
 
     if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_LEFT_PARENTHESIS") == 0)
     {
@@ -117,19 +134,19 @@ PrintStatement *ParserPrintStatement(Parser *parser)
 
         if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_RIGHT_PARENTHESIS") == 0)
         {
-            printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+            logToken(parser);
             controlNextToken(parser);
             return printStatement;
         }
         else
         {
-            throwError(1, "Error: Expected )\n");
+           throwError(1, "Expected )\n");
             exit(1);
         }
     }
     else
     {
-        throwError(1, "Error: Expected identifier\n");
+       throwError(1, "Expected identifier\n");
         exit(1);
     }
 }
@@ -137,9 +154,11 @@ PrintStatement *ParserPrintStatement(Parser *parser)
 Expression *ParserExpression(Parser *parser)
 {
     controlNextToken(parser);
-    printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+    logToken(parser);
 
-    if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_NUMBER") == 0)
+    if (
+        strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_NUMBER") == 0
+        || strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_STRING") == 0)
     {
         Expression *expr = createExpression_Term(
             cl(parser), ParserTerm(parser));
@@ -148,7 +167,7 @@ Expression *ParserExpression(Parser *parser)
     }
     else
     {
-        throwError(1, "Error: Expected TOKEN_TYPE_NUMBER\n");
+       throwError(1, "Expected TOKEN_TYPE_NUMBER\n");
         exit(1);
     }
 }
@@ -161,9 +180,15 @@ Term *ParserTerm(Parser *parser)
             cl(parser), createNumber(cl(parser), atoi(parser->token.value)));
         controlNextToken(parser);
     }
+    else if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_STRING") == 0)
+    {
+        return createTerm_string(
+            cl(parser), createString(cl(parser), removeQuotes(parser->token.value)));
+        controlNextToken(parser);
+    }
     else
     {
-        throwError(1, "Error: Expected TOKEN_TYPE_NUMBER, TOKEN_TYPE_IDENTIFIER\n");
+       throwError(1, "Expected TOKEN_TYPE_NUMBER, TOKEN_TYPE_IDENTIFIER\n");
         exit(1);
     }
 }
@@ -173,12 +198,12 @@ Term *ParserTerm(Parser *parser)
 //     controlNextToken(parser);
 //     if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_STRING") == 0)
 //     {
-//         printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+//         logToken(parser);
 //         controlNextToken(parser);
 //     }
 //     else
 //     {
-//         throwError(1, "Error: Expected string\n");
+//        throwError(1, "Expected string\n");
 //         exit(1);
 //     }
 // }
@@ -188,44 +213,44 @@ Term *ParserTerm(Parser *parser)
 //     controlNextToken(parser);
 //     if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_LEFT_PARENTHESIS") == 0)
 //     {
-//         printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+//         logToken(parser);
 //         controlNextToken(parser);
 
 //         if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_NUMBER") == 0)
 //         {
-//             printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+//             logToken(parser);
 //             controlNextToken(parser);
 //         }
 //         else if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_IDENTIFIER") == 0)
 //         {
-//             printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+//             logToken(parser);
 //             controlNextToken(parser);
 //         }
 //         else if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_STRING") == 0)
 //         {
-//             printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+//             logToken(parser);
 //             controlNextToken(parser);
 //         }
 //         else
 //         {
-//             throwError(1, "Error: Expected TOKEN_TYPE_NUMBER, TOKEN_TYPE_IDENTIFIER\n");
+//            throwError(1, "Expected TOKEN_TYPE_NUMBER, TOKEN_TYPE_IDENTIFIER\n");
 //             exit(1);
 //         }
 
 //         if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_RIGHT_PARENTHESIS") == 0)
 //         {
-//             printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+//             logToken(parser);
 //             controlNextToken(parser);
 //         }
 //         else
 //         {
-//             throwError(1, "Error: Expected )\n");
+//            throwError(1, "Expected )\n");
 //             exit(1);
 //         }
 //     }
 //     else
 //     {
-//         throwError(1, "Error: Expected (\n");
+//        throwError(1, "Expected (\n");
 //         exit(1);
 //     }
 // }
@@ -235,7 +260,7 @@ Term *ParserTerm(Parser *parser)
 //     controlNextToken(parser);
 //     if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_IDENTIFIER") == 0)
 //     {
-//         printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+//         logToken(parser);
 
 //         if (strcmp(parser->token.value, keywords[INT]) == 0)
 //         {
@@ -255,7 +280,7 @@ Term *ParserTerm(Parser *parser)
 //         }
 //         else
 //         {
-//             throwError(1, "Error: Expected int, float, string or bool\n");
+//            throwError(1, "Expected int, float, string or bool\n");
 //             exit(1);
 //         }
 
@@ -263,28 +288,28 @@ Term *ParserTerm(Parser *parser)
 
 //         if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_IDENTIFIER") == 0)
 //         {
-//             printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+//             logToken(parser);
 //             controlNextToken(parser);
 //         }
 //         else
 //         {
-//             throwError(1, "Error: Expected identifier\n");
+//            throwError(1, "Expected identifier\n");
 //             exit(1);
 //         }
 //     }
 //     else
 //     {
-//         throwError(1, "Error: Expected identifier\n");
+//        throwError(1, "Expected identifier\n");
 //         exit(1);
 //     }
 
-//     printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+//     logToken(parser);
 // }
 
 // void ParserAssignment(Parser *parser)
 // {
 //     controlNextToken(parser);
-//     printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+//     logToken(parser);
 
 //     if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_OPERATOR") == 0 && strcmp(parser->token.value, "=") == 0)
 //     {
@@ -292,10 +317,10 @@ Term *ParserTerm(Parser *parser)
 //     }
 //     else
 //     {
-//         throwError(1, "Error: Expected =\n");
+//        throwError(1, "Expected =\n");
 //         exit(1);
 //     }
-//     printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+//     logToken(parser);
 // }
 
 // void ParserExpressionTail(Parser *parser)
@@ -303,7 +328,7 @@ Term *ParserTerm(Parser *parser)
 //     controlNextToken(parser);
 //     if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_OPERATOR") == 0)
 //     {
-//         printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
+//         logToken(parser);
 //         ParserTerm(parser);
 //     }
 // }

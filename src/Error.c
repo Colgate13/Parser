@@ -10,6 +10,6 @@ void throwError(int code, char *message)
       .code = code,
       .message = message};
 
-  printf("<Parser> Error: %d with message: %s\n", Error.code, Error.message);
+  printf("<Parser> Error: %d - %s\n", Error.code, Error.message);
   exit(Error.code);
 }

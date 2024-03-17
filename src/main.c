@@ -14,18 +14,14 @@ int main(int argc, char *argv[])
 
   if (argc < 2)
   {
-    throwError(1, "Error: File not found\n");
+    throwError(1, "File not found\n");
     exit(1);
   }
 
   LexicalAnalyzer *lexicalAnalyzer = createLexicalAnalyzer(argv[1]);
   Parser *parser = createParser(lexicalAnalyzer);
-  printf("Star of file\n");
   ParserProgram(parser);
-  printf("End of file\n");
-
   AstConsumer(*parser->ast->program);
-
   closeLexicalAnalyzer(lexicalAnalyzer);
   return 0;
 }
