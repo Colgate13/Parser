@@ -134,8 +134,8 @@ PrintStatement *ParserPrintStatement(Parser *parser)
 
         if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_RIGHT_PARENTHESIS") == 0)
         {
-            logToken(parser);
             controlNextToken(parser);
+            logToken(parser);
             return printStatement;
         }
         else
@@ -159,10 +159,20 @@ Expression *ParserExpression(Parser *parser)
     if (
         strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_NUMBER") == 0 || strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_STRING") == 0)
     {
-        Expression *expr = createExpression_Term(
-            cl(parser), ParserTerm(parser));
+        Term *firstTerm = ParserTerm(parser);
         controlNextToken(parser);
-        return expr;
+        logToken(parser);
+
+        if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_OPERATOR") == 0)
+        {
+            Expression *exprTermTail = createExpression_Term_ExpressionTail(
+                cl(parser), firstTerm, ParserExpressionTail(parser, 0));
+
+            return exprTermTail;
+        }
+
+        Expression *exprTerm = createExpression_Term(cl(parser), firstTerm);
+        return exprTerm;
     }
     else
     {
@@ -171,19 +181,43 @@ Expression *ParserExpression(Parser *parser)
     }
 }
 
+ExpressionTail *ParserExpressionTail(Parser *parser, unsigned short int recursiveControl)
+{
+    if (recursiveControl == 1)
+    {
+        controlNextToken(parser);
+        logToken(parser);
+    }
+
+    if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_OPERATOR") == 0)
+    {
+        char op = *parser->token.value;
+        controlNextToken(parser);
+        logToken(parser);
+
+        // <term> --> <number>
+        if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_NUMBER") == 0)
+        {
+            ExpressionTail *exprTail = createExpressionTail(
+                cl(parser), op, ParserTerm(parser), ParserExpressionTail(parser, 1));
+            return exprTail;
+        }
+    }
+
+    return NULL;
+}
+
 Term *ParserTerm(Parser *parser)
 {
     if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_NUMBER") == 0)
     {
         return createTerm_number(
             cl(parser), createNumber(cl(parser), atoi(parser->token.value)));
-        controlNextToken(parser);
     }
     else if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_STRING") == 0)
     {
         return createTerm_string(
             cl(parser), createString(cl(parser), removeQuotes(parser->token.value)));
-        controlNextToken(parser);
     }
     else
     {

@@ -358,6 +358,28 @@ cJSON *AstConsumerTerm(Term *term)
   return jsonTerm;
 }
 
+cJSON *AstConsumerExpressionTail(ExpressionTail *exprTail)
+{
+  if (exprTail == NULL)
+  {
+    printf("ExpressionTail without expression_tail\n");
+    exit(1);
+  }
+
+  cJSON *jsonExprTail = cJSON_CreateObject();
+  cJSON_AddItemToObject(jsonExprTail, "Op", cJSON_CreateString(&exprTail->op));
+  cJSON_AddItemToObject(jsonExprTail, "Term", AstConsumerTerm(exprTail->term));
+
+  if (exprTail->next != NULL)
+  {
+    cJSON_AddItemToObject(jsonExprTail, "Next", AstConsumerExpressionTail(exprTail->next));
+  }
+
+  cJSON_AddItemToObject(jsonExprTail, "Location", checkLocation(exprTail->location));
+
+  return jsonExprTail;
+}
+
 cJSON *AstConsumerExpression(Expression *expr)
 {
   if (expr == NULL)
@@ -368,9 +390,14 @@ cJSON *AstConsumerExpression(Expression *expr)
 
   cJSON *jsonExpr = cJSON_CreateObject();
   cJSON_AddItemToObject(jsonExpr, "Term", AstConsumerTerm(expr->term));
-  cJSON_AddItemToObject(jsonExpr, "Location", checkLocation(expr->location));
 
   // TODO: expression_tail
+  if (expr->expression_tail != NULL)
+  {
+    cJSON_AddItemToObject(jsonExpr, "ExpressionTail", AstConsumerExpressionTail(expr->expression_tail));
+  }
+
+  cJSON_AddItemToObject(jsonExpr, "Location", checkLocation(expr->location));
 
   return jsonExpr;
 }
@@ -414,7 +441,7 @@ void AstConsumer(Program program)
 
   cJSON *jsonProgram = cJSON_CreateObject();
   cJSON *jsonStatements = cJSON_CreateArray();
-  
+
   cJSON_AddItemToObject(jsonProgram, "Statements", jsonStatements);
 
   Statement *currentStatement = program.statements;
@@ -473,93 +500,93 @@ void AstConsumer(Program program)
 
 //   AstConsumer(program);
 // }
-  // program.statements = createStatement_PrintStatement(
-  //     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-  //     NULL,
-  //     NULL,
-  //     createPrintStatement(
-  //         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-  //         createExpression_Term(
-  //             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-  //             createTerm_string(
-  //                 createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-  //                 createString(
-  //                     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-  //                     "Hello World")))));
+// program.statements = createStatement_PrintStatement(
+//     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+//     NULL,
+//     NULL,
+//     createPrintStatement(
+//         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+//         createExpression_Term(
+//             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+//             createTerm_string(
+//                 createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+//                 createString(
+//                     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
+//                     "Hello World")))));
 
-  // program.statements->next = createStatement_VariableDeclaration(
-  //     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
-  //     NULL,
-  //     createVariableDeclaration(
-  //         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
-  //         getType("int"),
-  //         createIdentifier(
-  //             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
-  //             "num1")),
-  //     NULL);
+// program.statements->next = createStatement_VariableDeclaration(
+//     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
+//     NULL,
+//     createVariableDeclaration(
+//         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
+//         getType("int"),
+//         createIdentifier(
+//             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
+//             "num1")),
+//     NULL);
 
-  // program.statements->next->next = createStatement_VariableDeclaration(
-  //     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
-  //     NULL,
-  //     createVariableDeclaration(
-  //         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
-  //         getType("int"),
-  //         createIdentifier(
-  //             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
-  //             "num2")),
-  //     NULL);
+// program.statements->next->next = createStatement_VariableDeclaration(
+//     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
+//     NULL,
+//     createVariableDeclaration(
+//         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
+//         getType("int"),
+//         createIdentifier(
+//             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
+//             "num2")),
+//     NULL);
 
-  // program.statements->next->next->next = createStatement_VariableDeclaration(
-  //     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
-  //     NULL,
-  //     createVariableDeclaration(
-  //         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
-  //         getType("int"),
-  //         createIdentifier(
-  //             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
-  //             "result")),
-  //     NULL);
+// program.statements->next->next->next = createStatement_VariableDeclaration(
+//     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
+//     NULL,
+//     createVariableDeclaration(
+//         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
+//         getType("int"),
+//         createIdentifier(
+//             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
+//             "result")),
+//     NULL);
 
-  // printf("Program\n");
-  // printf("Statement\n");
-  // printf("Assignment\n");
+// printf("Program\n");
+// printf("Statement\n");
+// printf("Assignment\n");
 
-  /*
-  program
+/*
+program
 
-    print("Hello World");
+  print("Hello World");
 
-    var int num1;
-    var int num2;
-    var int result;
+  var int num1;
+  var int num2;
+  var int result;
 
-    num1 = 1;
-    num2 = 2;
+  num1 = 1;
+  num2 = 2;
 
-    result = num1 + num2;
+  result = num1 + num2;
 
-    print(result);
+  print(result);
 
-  end;
-  */
+end;
+*/
 
-  // AstConsumer(program);
-  // if (program.statements) {
-  //   printf("Statement\n");
-  //   if (program.statements->print_statement) {
-  //     printf("PrintStatement\n");
-  //     if (program.statements->print_statement->expression) {
-  //       printf("Expression\n");
-  //       if (program.statements->print_statement->expression->term) {
-  //         printf("Term\n");
-  //         if (program.statements->print_statement->expression->term->string) {
-  //           printf("String\n");
-  //           printf("Value: %s\n", program.statements->print_statement->expression->term->string->value);
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+// AstConsumer(program);
+// if (program.statements) {
+//   printf("Statement\n");
+//   if (program.statements->print_statement) {
+//     printf("PrintStatement\n");
+//     if (program.statements->print_statement->expression) {
+//       printf("Expression\n");
+//       if (program.statements->print_statement->expression->term) {
+//         printf("Term\n");
+//         if (program.statements->print_statement->expression->term->string) {
+//           printf("String\n");
+//           printf("Value: %s\n", program.statements->print_statement->expression->term->string->value);
+//         }
+//       }
+//     }
+//   }
+// }
 
 //   return 0;
 // }

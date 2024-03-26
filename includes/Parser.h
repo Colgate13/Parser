@@ -151,6 +151,7 @@ Parser *createParser(LexicalAnalyzer *lexicalAnalyzer);
 Statement *ParserStatement(Parser *parser);
 PrintStatement *ParserPrintStatement(Parser *parser);
 Expression *ParserExpression(Parser *parser);
+ExpressionTail *ParserExpressionTail(Parser *parser, unsigned short int recursiveControl);
 Term *ParserTerm(Parser *parser);
 
 Location *cl(Parser *parser);
