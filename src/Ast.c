@@ -446,10 +446,10 @@ void AstConsumer(Program program)
 
   Statement *currentStatement = program.statements;
 
-  cJSON *jsonStatement = cJSON_CreateObject();
   while (currentStatement != NULL)
   {
 
+    cJSON *jsonStatement = cJSON_CreateObject();
     switch (currentStatement->type)
     {
     case PRINT_STATEMENT:

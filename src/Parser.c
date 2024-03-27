@@ -89,10 +89,27 @@ void ParserProgram(Parser *parser)
     {
         logToken(parser);
         parser->ast->program->statements = ParserStatement(parser);
-        controlNextToken(parser);
         if ((parser->token.value && strcmp(parser->token.value, keywords[END]) == 0) || strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_END") == 0)
         {
             return;
+        }
+
+        Statement *currentStatement = parser->ast->program->statements;
+        while (1)
+        {
+            Statement *newStatement = ParserStatement(parser);
+
+            if (newStatement == NULL)
+            {
+                return;
+            }
+
+            currentStatement->next = newStatement;
+            currentStatement = currentStatement->next;
+            if ((parser->token.value && strcmp(parser->token.value, keywords[END]) == 0) || strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_END") == 0)
+            {
+                return;
+            }
         }
     }
 }
@@ -104,6 +121,11 @@ Statement *ParserStatement(Parser *parser)
 {
     controlNextToken(parser);
     logToken(parser);
+
+    if ((parser->token.value && strcmp(parser->token.value, keywords[END]) == 0) || strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_END") == 0)
+    {
+        return NULL;
+    }
 
     if (strcmp(parser->token.value, keywords[PRINT]) == 0)
     {
