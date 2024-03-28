@@ -24,5 +24,4 @@ My Grammar:
 <type>               --> "int"
                     | "float"
                     | "string"
-                    | "bool"
 ```

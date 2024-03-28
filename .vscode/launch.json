@@ -7,7 +7,7 @@
           "request": "launch",
           "program": "${workspaceFolder}/bin/main",
           "args": [
-            "./utils/exemples/print/mult-print/exemple.code"
+            "./utils/exemples/general/exemple.code"
           ],
           "stopAtEntry": false,
           "cwd": "${workspaceFolder}",

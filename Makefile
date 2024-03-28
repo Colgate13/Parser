@@ -7,7 +7,7 @@ LIB_PATH = -L/usr/local/lib # path to libraries
 CFLAGS =-g -Wall -Wextra $(LIB_INCLUDE) # compiler flags
 TARGET = main # output file
 SOURCE_FILE = $(SRC_DIR)/main.c # source file
-SOURCES = $(SRC_DIR)/Error.c $(SRC_DIR)/Parser.c $(SRC_DIR)/Ast.c # sources
+SOURCES = $(SRC_DIR)/Error.c $(SRC_DIR)/Parser.c $(SRC_DIR)/Ast.c $(SRC_DIR)/Utils.c # sources
 LIB_LEXICAL_ANALIZER = -llexicalAnalyzer
 LIB_CJSON = -lcjson
 

@@ -71,7 +71,12 @@
     "__tuple": "c",
     "cjson.h": "c",
     "stdio.h": "c",
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "__bit_reference": "c",
+    "__node_handle": "c",
+    "__memory": "c",
+    "locale": "c",
+    "utils.h": "c"
   },
   "C_Cpp.errorSquiggles": "disabled",
 }

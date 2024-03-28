@@ -258,17 +258,13 @@ Type getLiteralType(char *searchType)
   {
     return TYPE_INT;
   }
-  else if (strcmp(searchType, "string") == 0)
-  {
-    return TYPE_STRING;
-  }
-  else if (strcmp(searchType, "bool") == 0)
-  {
-    return TYPE_BOOL;
-  }
   else if (strcmp(searchType, "float") == 0)
   {
     return TYPE_FLOAT;
+  }
+  else if (strcmp(searchType, "string") == 0)
+  {
+    return TYPE_STRING;
   }
   else
   {
@@ -358,6 +354,22 @@ cJSON *AstConsumerTerm(Term *term)
   return jsonTerm;
 }
 
+cJSON *AstConsumerIdentifier(Identifier *identifier)
+{
+  if (identifier == NULL)
+  {
+    printf("Identifier without identifier\n");
+    exit(1);
+  }
+
+  cJSON *jsonIdentifier = cJSON_CreateObject();
+
+  cJSON_AddItemToObject(jsonIdentifier, "Name", cJSON_CreateString(identifier->name));
+  cJSON_AddItemToObject(jsonIdentifier, "Location", checkLocation(identifier->location));
+
+  return jsonIdentifier;
+}
+
 cJSON *AstConsumerExpressionTail(ExpressionTail *exprTail)
 {
   if (exprTail == NULL)
@@ -391,7 +403,6 @@ cJSON *AstConsumerExpression(Expression *expr)
   cJSON *jsonExpr = cJSON_CreateObject();
   cJSON_AddItemToObject(jsonExpr, "Term", AstConsumerTerm(expr->term));
 
-  // TODO: expression_tail
   if (expr->expression_tail != NULL)
   {
     cJSON_AddItemToObject(jsonExpr, "ExpressionTail", AstConsumerExpressionTail(expr->expression_tail));
@@ -417,6 +428,38 @@ cJSON *AstConsumerPrintStatement(PrintStatement *ps)
   return jsonPs;
 }
 
+cJSON *AstConsumerVariableDeclarationStatement(VariableDeclaration *vd)
+{
+  if (vd == NULL)
+  {
+    printf("VariableDeclarationStatement without variable_declaration\n");
+    exit(1);
+  }
+
+  cJSON *jsonVd = cJSON_CreateObject();
+  cJSON_AddNumberToObject(jsonVd, "Type", vd->type);
+  cJSON_AddItemToObject(jsonVd, "Identifier", AstConsumerIdentifier(vd->identifier));
+  cJSON_AddItemToObject(jsonVd, "Location", checkLocation(vd->location));
+
+  return jsonVd;
+}
+
+cJSON *AstConsumerAssignmentStatement(Assignment *ag)
+{
+  if (ag == NULL)
+  {
+    printf("AssignmentStatement without assignment\n");
+    exit(1);
+  }
+
+  cJSON *jsonAg = cJSON_CreateObject();
+  cJSON_AddItemToObject(jsonAg, "Identifier", AstConsumerIdentifier(ag->identifier));
+  cJSON_AddItemToObject(jsonAg, "Expression", AstConsumerExpression(ag->expression));
+  cJSON_AddItemToObject(jsonAg, "Location", checkLocation(ag->location));
+
+  return jsonAg;
+}
+
 void createOutputFile(cJSON *json)
 {
   FILE *file = fopen(fileOutputAst, "w");
@@ -428,6 +471,7 @@ void createOutputFile(cJSON *json)
 
   fprintf(file, "%s", cJSON_Print(json));
   fclose(file);
+  printf("File output: %s", fileOutputAst);
 }
 
 void AstConsumer(Program program)
@@ -465,8 +509,33 @@ void AstConsumer(Program program)
       currentStatement = currentStatement->next;
       break;
 
+    case VARIABLE_DECLARATION_STATEMENT:
+      if (currentStatement->variable_declaration == NULL)
+      {
+        printf("VariableDeclarationStatement without variable_declaration\n");
+        exit(1);
+      }
+
+      cJSON *jsonVariableDeclaration = AstConsumerVariableDeclarationStatement(currentStatement->variable_declaration);
+      cJSON_AddItemToObject(jsonStatement, "VariableDeclaration", jsonVariableDeclaration);
+
+      currentStatement = currentStatement->next;
+      break;
+    case ASSIGNMENT_STATEMENT:
+      if (currentStatement->assignment == NULL)
+      {
+        printf("AssignmentStatement without assignment\n");
+        exit(1);
+      }
+
+      cJSON *jsonAssignment = AstConsumerAssignmentStatement(currentStatement->assignment);
+      cJSON_AddItemToObject(jsonStatement, "Assignment", jsonAssignment);
+
+      currentStatement = currentStatement->next;
+      break;
     default:
       printf("Statement type unknow\n");
+      exit(1);
       break;
     }
 
@@ -478,115 +547,3 @@ void AstConsumer(Program program)
   createOutputFile(jsonProgram);
   cJSON_Delete(jsonProgram);
 }
-
-// int main()
-// {
-//   Program program;
-//   program = createProgram(createLocation("/home/gabriel/projetos/Parser/utils/example.code", 1, 1));
-
-//   program.statements = createStatement_PrintStatement(
-//       createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-//       NULL,
-//       NULL,
-//       createPrintStatement(
-//           createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-//           createExpression_Term(
-//               createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-//               createTerm_string(
-//                   createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-//                   createString(
-//                       createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-//                       "Hello World")))));
-
-//   AstConsumer(program);
-// }
-// program.statements = createStatement_PrintStatement(
-//     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-//     NULL,
-//     NULL,
-//     createPrintStatement(
-//         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-//         createExpression_Term(
-//             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-//             createTerm_string(
-//                 createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-//                 createString(
-//                     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 3, 3),
-//                     "Hello World")))));
-
-// program.statements->next = createStatement_VariableDeclaration(
-//     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
-//     NULL,
-//     createVariableDeclaration(
-//         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
-//         getType("int"),
-//         createIdentifier(
-//             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 5, 5),
-//             "num1")),
-//     NULL);
-
-// program.statements->next->next = createStatement_VariableDeclaration(
-//     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
-//     NULL,
-//     createVariableDeclaration(
-//         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
-//         getType("int"),
-//         createIdentifier(
-//             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 6, 6),
-//             "num2")),
-//     NULL);
-
-// program.statements->next->next->next = createStatement_VariableDeclaration(
-//     createLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
-//     NULL,
-//     createVariableDeclaration(
-//         createLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
-//         getType("int"),
-//         createIdentifier(
-//             createLocation("/home/gabriel/projetos/Parser/utils/example.code", 7, 7),
-//             "result")),
-//     NULL);
-
-// printf("Program\n");
-// printf("Statement\n");
-// printf("Assignment\n");
-
-/*
-program
-
-  print("Hello World");
-
-  var int num1;
-  var int num2;
-  var int result;
-
-  num1 = 1;
-  num2 = 2;
-
-  result = num1 + num2;
-
-  print(result);
-
-end;
-*/
-
-// AstConsumer(program);
-// if (program.statements) {
-//   printf("Statement\n");
-//   if (program.statements->print_statement) {
-//     printf("PrintStatement\n");
-//     if (program.statements->print_statement->expression) {
-//       printf("Expression\n");
-//       if (program.statements->print_statement->expression->term) {
-//         printf("Term\n");
-//         if (program.statements->print_statement->expression->term->string) {
-//           printf("String\n");
-//           printf("Value: %s\n", program.statements->print_statement->expression->term->string->value);
-//         }
-//       }
-//     }
-//   }
-// }
-
-//   return 0;
-// }

@@ -2,13 +2,13 @@
 #define PARSER_H
 
 #include <lexicalAnalyzer.h>
+#define LOGS 0
 
 typedef enum
 {
-  TYPE_INT,
+  TYPE_INT = 0,
   TYPE_FLOAT,
-  TYPE_STRING,
-  TYPE_BOOL
+  TYPE_STRING
 } Type;
 
 enum EStatementsType
@@ -26,8 +26,7 @@ enum EKeywords
   PRINT,
   INT,
   FLOAT,
-  STRING,
-  BOOL,
+  STRING
 };
 
 // Location = { start: 0, end: 0, fileName: "test.txt" }
@@ -144,21 +143,18 @@ typedef struct
 
 void controlNextToken(Parser *parser);
 void ParserProgram(Parser *parser);
-void logToken(Parser *parser);
-char *removeQuotes(char *str);
 
 Parser *createParser(LexicalAnalyzer *lexicalAnalyzer);
 Statement *ParserStatement(Parser *parser);
 PrintStatement *ParserPrintStatement(Parser *parser);
+VariableDeclaration *ParserVariableDeclaration(Parser *parser);
+Assignment *ParserAssignment(Parser *parser);
+
 Expression *ParserExpression(Parser *parser);
 ExpressionTail *ParserExpressionTail(Parser *parser, unsigned short int recursiveControl);
 Term *ParserTerm(Parser *parser);
 
 Location *cl(Parser *parser);
-// void ParserString(Parser *parser);
-// void ParserParenthesis(Parser *parser);
-// void ParserVariableDeclaration(Parser *parser);
-// void ParserAssignment(Parser *parser);
-// void ParserExpressionTail(Parser *parser);
+// void ParserParenthesis(Parser *parser); !TODO!
 
 #endif

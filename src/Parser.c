@@ -6,6 +6,7 @@
 #include "../includes/Error.h"
 #include "../includes/Parser.h"
 #include "../includes/Ast.h"
+#include "../includes/Utils.h"
 
 const char *keywords[] = {
     "program",
@@ -14,8 +15,7 @@ const char *keywords[] = {
     "print",
     "int",
     "float",
-    "string",
-    "bool",
+    "string"
 };
 
 Parser *createParser(LexicalAnalyzer *lexicalAnalyzer)
@@ -44,30 +44,6 @@ void controlNextToken(Parser *parser)
 
     if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_END_LINE") == 0)
         parser->token = nextToken(parser->lexicalAnalyzer);
-}
-
-Location *cl(Parser *parser)
-{
-    return createLocation("*file*", parser->lexicalAnalyzer->lineCount, parser->lexicalAnalyzer->positionCount);
-}
-
-void logToken(Parser *parser)
-{
-    printf("Token: %s, value: %s\n", tokenTypeName(parser->token.type), parser->token.value);
-}
-
-char *removeQuotes(char *str)
-{
-    int i, j;
-    for (i = 0, j = 0; str[i] != '\0'; i++)
-    {
-        if (str[i] != '\"')
-        {
-            str[j++] = str[i];
-        }
-    }
-    str[j] = '\0';
-    return str;
 }
 
 /**
@@ -133,9 +109,21 @@ Statement *ParserStatement(Parser *parser)
             cl(parser),
             ParserPrintStatement(parser));
     }
+    else if (strcmp(parser->token.value, keywords[VAR]) == 0)
+    {
+        return createStatement_VariableDeclaration(
+            cl(parser),
+            ParserVariableDeclaration(parser));
+    }
+    else if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_IDENTIFIER") == 0)
+    {
+        return createStatement_Assignment(
+            cl(parser),
+            ParserAssignment(parser));
+    }
     else
     {
-        throwError(1, "Expected identifier, print or end\n");
+        throwError(1, "Expected print_statement , variable_declaration or assignment\n");
         exit(1);
     }
 }
@@ -173,13 +161,82 @@ PrintStatement *ParserPrintStatement(Parser *parser)
     }
 }
 
+/**
+ * @details Implements <variable_declaration>
+ */
+VariableDeclaration *ParserVariableDeclaration(Parser *parser)
+{
+    controlNextToken(parser);
+    logToken(parser);
+
+    unsigned short int type;
+    if (strcmp(parser->token.value, keywords[INT]) == 0)
+    {
+        type = TYPE_INT;
+    }
+    else if (strcmp(parser->token.value, keywords[FLOAT]) == 0)
+    {
+        type = TYPE_FLOAT;
+    }
+    else if (strcmp(parser->token.value, keywords[STRING]) == 0)
+    {
+        type = TYPE_STRING;
+    }
+    else
+    {
+        throwError(1, "Expected type\n");
+        exit(1);
+    }
+
+    controlNextToken(parser);
+    logToken(parser);
+
+    Identifier *identifier = createIdentifier(
+        cl(parser), parser->token.value);
+
+    VariableDeclaration *variableDeclaration = createVariableDeclaration(
+        cl(parser), type, identifier);
+
+    controlNextToken(parser);
+    logToken(parser);
+
+    return variableDeclaration;
+}
+
+/**
+ * @details Implements <assignment>
+ */
+Assignment *ParserAssignment(Parser *parser)
+{
+    if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_IDENTIFIER") == 0)
+    {
+        Identifier *identifier = createIdentifier(
+            cl(parser), parser->token.value);
+
+        controlNextToken(parser);
+        logToken(parser);
+
+        if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_OPERATOR") == 0 &&
+            strcmp(parser->token.value, "=") == 0)
+        {
+            Expression *expr = ParserExpression(parser);
+
+            return createAssignment(
+                cl(parser), identifier, expr);
+        }
+    }
+
+    throwError(1, "Expected TOKEN_TYPE_IDENTIFIER\n");
+    exit(1);
+}
+
 Expression *ParserExpression(Parser *parser)
 {
     controlNextToken(parser);
     logToken(parser);
 
     if (
-        strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_NUMBER") == 0 || strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_STRING") == 0)
+        strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_NUMBER") == 0 || strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_STRING") == 0 || strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_IDENTIFIER") == 0)
     {
         Term *firstTerm = ParserTerm(parser);
         controlNextToken(parser);
@@ -217,12 +274,17 @@ ExpressionTail *ParserExpressionTail(Parser *parser, unsigned short int recursiv
         controlNextToken(parser);
         logToken(parser);
 
-        // <term> --> <number>
-        if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_NUMBER") == 0)
+        // <term> --> <number> | <string> |<identifier>
+        if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_NUMBER") == 0 || strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_STRING") == 0 || strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_IDENTIFIER") == 0)
         {
             ExpressionTail *exprTail = createExpressionTail(
                 cl(parser), op, ParserTerm(parser), ParserExpressionTail(parser, 1));
             return exprTail;
+        }
+        else
+        {
+            throwError(1, "Expected TOKEN_TYPE_NUMBER, TOKEN_TYPE_STRING or TOKEN_TYPE_IDENTIFIER\n");
+            exit(1);
         }
     }
 
@@ -233,157 +295,26 @@ Term *ParserTerm(Parser *parser)
 {
     if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_NUMBER") == 0)
     {
+        Number *number = strchr(parser->token.value, '.') != NULL
+                             ? createNumber(cl(parser), atof(parser->token.value))
+                             : createNumber(cl(parser), atoi(parser->token.value));
+
         return createTerm_number(
-            cl(parser), createNumber(cl(parser), atoi(parser->token.value)));
+            cl(parser), number);
     }
     else if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_STRING") == 0)
     {
         return createTerm_string(
             cl(parser), createString(cl(parser), removeQuotes(parser->token.value)));
     }
+    else if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_IDENTIFIER") == 0)
+    {
+        return createTerm_identifier(
+            cl(parser), createIdentifier(cl(parser), parser->token.value));
+    }
     else
     {
-        throwError(1, "Expected TOKEN_TYPE_NUMBER, TOKEN_TYPE_IDENTIFIER\n");
+        throwError(1, "Expected TOKEN_TYPE_NUMBER, TOKEN_TYPE_STRING or TOKEN_TYPE_IDENTIFIER\n");
         exit(1);
     }
 }
-
-// void ParserString(Parser *parser)
-// {
-//     controlNextToken(parser);
-//     if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_STRING") == 0)
-//     {
-//         logToken(parser);
-//         controlNextToken(parser);
-//     }
-//     else
-//     {
-//        throwError(1, "Expected string\n");
-//         exit(1);
-//     }
-// }
-
-// void ParserParenthesis(Parser *parser)
-// {
-//     controlNextToken(parser);
-//     if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_LEFT_PARENTHESIS") == 0)
-//     {
-//         logToken(parser);
-//         controlNextToken(parser);
-
-//         if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_NUMBER") == 0)
-//         {
-//             logToken(parser);
-//             controlNextToken(parser);
-//         }
-//         else if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_IDENTIFIER") == 0)
-//         {
-//             logToken(parser);
-//             controlNextToken(parser);
-//         }
-//         else if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_STRING") == 0)
-//         {
-//             logToken(parser);
-//             controlNextToken(parser);
-//         }
-//         else
-//         {
-//            throwError(1, "Expected TOKEN_TYPE_NUMBER, TOKEN_TYPE_IDENTIFIER\n");
-//             exit(1);
-//         }
-
-//         if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_RIGHT_PARENTHESIS") == 0)
-//         {
-//             logToken(parser);
-//             controlNextToken(parser);
-//         }
-//         else
-//         {
-//            throwError(1, "Expected )\n");
-//             exit(1);
-//         }
-//     }
-//     else
-//     {
-//        throwError(1, "Expected (\n");
-//         exit(1);
-//     }
-// }
-
-// void ParserVariableDeclaration(Parser *parser)
-// {
-//     controlNextToken(parser);
-//     if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_IDENTIFIER") == 0)
-//     {
-//         logToken(parser);
-
-//         if (strcmp(parser->token.value, keywords[INT]) == 0)
-//         {
-//             printf("INT\n");
-//         }
-//         else if (strcmp(parser->token.value, keywords[FLOAT]) == 0)
-//         {
-//             printf("FLOAT\n");
-//         }
-//         else if (strcmp(parser->token.value, keywords[STRING]) == 0)
-//         {
-//             printf("STRING\n");
-//         }
-//         else if (strcmp(parser->token.value, keywords[BOOL]) == 0)
-//         {
-//             printf("BOOL\n");
-//         }
-//         else
-//         {
-//            throwError(1, "Expected int, float, string or bool\n");
-//             exit(1);
-//         }
-
-//         controlNextToken(parser);
-
-//         if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_IDENTIFIER") == 0)
-//         {
-//             logToken(parser);
-//             controlNextToken(parser);
-//         }
-//         else
-//         {
-//            throwError(1, "Expected identifier\n");
-//             exit(1);
-//         }
-//     }
-//     else
-//     {
-//        throwError(1, "Expected identifier\n");
-//         exit(1);
-//     }
-
-//     logToken(parser);
-// }
-
-// void ParserAssignment(Parser *parser)
-// {
-//     controlNextToken(parser);
-//     logToken(parser);
-
-//     if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_OPERATOR") == 0 && strcmp(parser->token.value, "=") == 0)
-//     {
-//         ParserExpression(parser);
-//     }
-//     else
-//     {
-//        throwError(1, "Expected =\n");
-//         exit(1);
-//     }
-//     logToken(parser);
-// }
-
-// void ParserExpressionTail(Parser *parser)
-// {
-//     controlNextToken(parser);
-//     if (strcmp(tokenTypeName(parser->token.type), "TOKEN_TYPE_OPERATOR") == 0)
-//     {
-//         logToken(parser);
-//         ParserTerm(parser);
-//     }
-// }

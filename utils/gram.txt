@@ -1,8 +1,8 @@
 <program>            --> "program" <statement> "end;"
 
-<statement>          --> <assignment>
+<statement>          --> <print_statement>
                     | <variable_declaration>
-                    | <print_statement>
+                    | <assignment>
 
 <variable_declaration> --> "var" <type> <identifier> ";"
 
@@ -17,7 +17,7 @@
                     | "-" <term> <expression_tail>
                     | "*" <term> <expression_tail>
                     | "/" <term> <expression_tail>
-                    | "%" <term> <expression_tail> !TODO! 
+                    | "%" <term> <expression_tail>
                     | ε
 
 <term>               --> <number>
@@ -33,4 +33,3 @@
 <type>               --> "int"
                     | "float"
                     | "string"
-                    | "bool"

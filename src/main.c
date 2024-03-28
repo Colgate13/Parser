@@ -9,7 +9,7 @@
 
 int main(int argc, char *argv[])
 {
-  printf("Lexical Analyzer\n");
+  printf("Parser\n");
   printf("File attach: %s\n", argv[1]);
 
   if (argc < 2)
