@@ -2,12 +2,12 @@
 
 unsigned short int checkToken(Parser *parser, char *tokenType)
 {
-    return strcmp(tokenTypeName(parser->token.type), tokenType) == 0;
+    return strcmp(tokenTypeName(parser->token.type), tokenType);
 }
 
 unsigned short int checkValue(Parser *parser, char *value)
 {
-    return strcmp(parser->token.value, value) == 0;
+    return strcmp(parser->token.value, value);
 }
 
 
