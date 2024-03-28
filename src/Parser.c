@@ -15,8 +15,7 @@ const char *keywords[] = {
     "print",
     "int",
     "float",
-    "string"
-};
+    "string"};
 
 Parser *createParser(LexicalAnalyzer *lexicalAnalyzer)
 {
@@ -275,7 +274,7 @@ ExpressionTail *ParserExpressionTail(Parser *parser, unsigned short int recursiv
         logToken(parser);
 
         // <term> --> <number> | <string> |<identifier>
-        if (        checkToken(parser, "TOKEN_TYPE_NUMBER") == 0 || checkToken(parser, "TOKEN_TYPE_STRING") == 0 || checkToken(parser, "TOKEN_TYPE_IDENTIFIER") == 0)
+        if (checkToken(parser, "TOKEN_TYPE_NUMBER") == 0 || checkToken(parser, "TOKEN_TYPE_STRING") == 0 || checkToken(parser, "TOKEN_TYPE_IDENTIFIER") == 0)
         {
             ExpressionTail *exprTail = createExpressionTail(
                 cl(parser), op, ParserTerm(parser), ParserExpressionTail(parser, 1));

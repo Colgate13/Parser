@@ -10,7 +10,6 @@ unsigned short int checkValue(Parser *parser, char *value)
     return strcmp(parser->token.value, value);
 }
 
-
 char *removeQuotes(char *str)
 {
     int i, j;
