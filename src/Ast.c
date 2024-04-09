@@ -3,7 +3,6 @@
 #include <string.h>
 #include "../includes/Ast.h"
 
-char *fileOutput = "output.js";
 char *fileOutputAst = "ast-output.json";
 
 /**
@@ -460,7 +459,7 @@ cJSON *AstConsumerAssignmentStatement(Assignment *ag)
   return jsonAg;
 }
 
-void createOutputFile(cJSON *json)
+void createOutputFile(cJSON *json, char *fileOutputAst)
 {
   FILE *file = fopen(fileOutputAst, "w");
   if (file == NULL)
@@ -474,7 +473,7 @@ void createOutputFile(cJSON *json)
   printf("File output: %s", fileOutputAst);
 }
 
-void AstConsumer(Program program)
+void AstConsumer(Program program, char *fileOutputAst)
 {
 
   if (program.statements == NULL)
@@ -544,6 +543,6 @@ void AstConsumer(Program program)
 
   cJSON *jsonLocation = checkLocation(program.location);
   cJSON_AddItemToObject(jsonProgram, "Location", jsonLocation);
-  createOutputFile(jsonProgram);
+  createOutputFile(jsonProgram,  fileOutputAst);
   cJSON_Delete(jsonProgram);
 }

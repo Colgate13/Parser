@@ -26,9 +26,6 @@ $(OUTPUT_FILE): $(SOURCE_FILE) | $(BIN_DIR)
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
-build_ast:
-	$(CC) $(CFLAGS) -o $(BIN_DIR)/ast $(SRC_DIR)/Ast.c $(LIBS_ALL)
-
 clean:
 	rm -rf $(BIN_DIR)/$(TARGET)
 
