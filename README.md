@@ -1,7 +1,7 @@
 <h1 align="center">Parser</h1>
 
 <p align="center">
-   <img src="https://raw.githubusercontent.com/Colgate13/Parser/main/utils/parsing-overview.png" alt="parser" width="400"/>
+   <img src="https://raw.githubusercontent.com/Colgate13/Parser/main/utils/parsing-overview.png" alt="parser" width="800"/>
 </p>
 
 <p align="center">	
