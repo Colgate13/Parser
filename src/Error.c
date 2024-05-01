@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "../includes/Error.h"
 
 void throwError(int code, char *message)

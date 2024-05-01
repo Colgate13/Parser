@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <lexicalAnalyzer.h>
 #include "../includes/Parser.h"
 #include "../includes/Ast.h"

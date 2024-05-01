@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
@@ -15,7 +14,8 @@ const char *keywords[] = {
     "print",
     "int",
     "float",
-    "string"};
+    "string"
+};
 
 Parser *createParser(LexicalAnalyzer *lexicalAnalyzer)
 {
